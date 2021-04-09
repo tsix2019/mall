@@ -4,77 +4,11 @@
     <home-swiper :banners="banners"></home-swiper>
     <recommend-view :recommends="recommends"></recommend-view>
     <feature></feature>
-    <tab-control :titles="['潮流','新款','推荐']"></tab-control>
-    <ul>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>666</li>
-      <li>999</li>
-    </ul>
+    <tab-control :titles="['潮流','新款','推荐']"
+                @tabClick="tabCilck">
+
+    </tab-control>
+    <goods-iist :goods="showGoods"></goods-iist>
   </div>
 </template>
 
@@ -84,7 +18,10 @@ import HomeSwiper from "@/views/home/childComps/HomeSwiper";
 import RecommendView from "@/views/home/childComps/RecommendView";
 import TabControl from "@/components/content/tabControl/TabControl"
 import Feature from "@/views/home/childComps/Feature"
+import GoodsIist from "@/components/content/goods/GoodsIist";
+
 import {getHomeMultidata,getHomeGoods} from "@/network/home";
+
 export default {
   name: "Home",
   data(){
@@ -93,9 +30,10 @@ export default {
       recommends:[],
       goods:{
         'pop':{page:0,list:[]},
-        'news':{page:0,list:[]},
+        'new':{page:0,list:[]},
         'sell':{page:0,list:[]}
-      }
+      },
+      currentType:'pop'
     }
   },
     components: {
@@ -103,19 +41,46 @@ export default {
       HomeSwiper,
       RecommendView,
       Feature,
+      GoodsIist,
       TabControl
     },
   created() {
-    getHomeMultidata().then( res => {
-      this.banners = res.data.banner.list;
-      this.recommends = res.data.recommend.list;
-      console.log(this.banners)
-      console.log(this.recommends)
-    })
-    getHomeGoods('pop',1).then( res => {
-      console.log(res)
-    })
+    this.getHomeMultidata();
+    this.getHomeGoods('pop')
+    this.getHomeGoods('new')
+    this.getHomeGoods('sell')
   },
+  methods:{
+    getHomeMultidata(){
+      getHomeMultidata().then( res => {
+        this.banners = res.data.banner.list;
+        this.recommends = res.data.recommend.list;
+        // console.log(this.banners)
+        // console.log(this.recommends)
+      })
+    },
+    getHomeGoods(type){
+      const page = this.goods[type].page + 1
+      getHomeGoods(type,page).then( res => {
+        this.goods[type].list.push(...res.data.list)
+        this.goods[type].page += 1
+      })
+    },
+    tabCilck(index){
+      if(index === 0){
+        this.currentType = 'pop'
+      }else if(index === 1){
+        this.currentType = 'new'
+      }else if(index === 2){
+        this.currentType = 'sell'
+      }
+    }
+  },
+  computed:{
+    showGoods(){
+      return this.goods[this.currentType].list
+    }
+  }
 
 }
 
